@@ -1,4 +1,3 @@
-#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,6 +5,8 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 
 #define INPUT_LIMIT 1024
 #define INPUT_DELIM " "
@@ -20,6 +21,7 @@ Commands:\
   exit\
   help\
   length [line]\
+  print [line]\
 "
 
 #define HELP \
@@ -29,10 +31,12 @@ Usage: feya [path]\n\
 " COMMANDS
 
 #define HELP_LENGTH(n) printf("Enter a line number in range [1; %d]\n", (n));
+#define HELP_PRINT(n) printf("Enter a line number in range [1; %d]\n", (n));
 
 typedef struct file_s
 {
-  int fd;
+  const char *data;
+  struct stat stat;
   struct {
     int count;
     int capacity;
@@ -63,51 +67,33 @@ void file_add_line(file_t *file, int offset, int length)
   file->lines.lenghts[idx] = length;
 }
 
-int file_block_analyze(file_t *file, const char *block, int file_offset, int last_len)
-{
-  const char *line_start = block;
-  const char *line_end = block;
-
-  // Increase last line from prev block
-  if (last_len != -1) {
-    line_end = strchr(line_start, '\n');
-
-    size_t length = line_end - line_start + 1;
-    file->lines.lenghts[file->lines.count - 1] = length + last_len;
-
-    line_start = line_end + 1;
-  }
-
-  // Scan lines with '\n'
-  while((line_end = strchr(line_start, '\n')))
-  {
-    size_t offset = file_offset + (size_t)(line_start - block);
-    size_t length = line_end - line_start;
-    file_add_line(file, offset, length);
-
-    line_start = line_end + 1;
-  }
-
-  // Last line ends with '\0'
-  size_t length = strlen(line_start);
-  line_end = line_start + length;
-  size_t offset = file_offset + (size_t)(line_start - block);
-  file_add_line(file, offset, length);
-
-  return length;
-}
-
 file_t* file_open(const char *path)
 {
   file_t *file = malloc(sizeof(file_t));
 
   // Get file descriptor
-  file->fd = open(path, O_RDWR);
-  if (!file->fd)
+  int fd = open(path, O_RDWR);
+  if (!fd)
   {
     perror("Couldn't open the file");
+    free(file);
     return NULL;
   }
+
+  // Get file stats
+  fstat(fd, &file->stat);
+
+  // Map the file
+  file->data = mmap(NULL, file->stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (file->data == MAP_FAILED)
+  {
+    perror("Mapping the file failed");
+    free(file);
+    return NULL;
+  }
+
+  // Close file
+  close(fd);
 
   // Default
   file->lines.count = 0;
@@ -115,34 +101,24 @@ file_t* file_open(const char *path)
   file->lines.offsets = malloc(sizeof(int) * LINES_DEFAULT_CAP);
   file->lines.lenghts = malloc(sizeof(int) * LINES_DEFAULT_CAP);
 
-  // Starting pos
-  lseek(file->fd, 0, SEEK_SET);
-
-  // Read file by blocks
-  puts("Reading file...");
-  size_t offset = 0;
-  char block[BLOCK_LIMIT + 1]; 
-  ssize_t n;
-  int last_len = -1;
-  while ((n = read(file->fd, block, BLOCK_LIMIT)))
+  // Read file
+  const char* end = file->data;
+  const char* start = file->data;
+  const char* limit = file->data + file->stat.st_size;
+  while(start <= limit)
   {
-    if (n == 0) 
+    end = memchr(start, '\n', limit - start);
+    if (!end) 
     {
-      puts("Reading file done!");
+      int len = limit - start;
+      file_add_line(file, start - file->data, len);
       break;
     }
-    if (n == -1)
-    {
-      if (errno == EINTR) continue;
 
-      perror("Couldn't read a block");
-      free(file);
-      return NULL;
-    }
-    block[n] = '\0';
+    int len = end - start;
+    file_add_line(file, start - file->data, len);
 
-    last_len = file_block_analyze(file, block, offset, last_len);
-    offset += n;
+    start = end + 1;
   }
 
   return file;
@@ -150,7 +126,7 @@ file_t* file_open(const char *path)
 
 void file_close(file_t *file)
 {
-  close(file->fd);
+  munmap((void*)file->data, file->stat.st_size);
   free(file);
 }
 // !FILE
@@ -177,21 +153,28 @@ void feya_length(file_t *file)
 
 void feya_print(file_t *file)
 {
-  // char *arg = strtok(NULL, INPUT_DELIM);
-  // if (!arg)
-  // {
-  //   HELP_PRINT(file->lines.count);
-  //   return;
-  // }
+  char *arg = strtok(NULL, INPUT_DELIM);
+  if (!arg)
+  {
+    HELP_PRINT(file->lines.count);
+    return;
+  }
 
-  // int nline = atoi(arg);
-  // if (nline > file->lines.count || nline < 1)
-  // {
-  //   HELP_PRINT(file->lines.count);
-  //   return;
-  // }
+  int nline = atoi(arg);
+  if (nline > file->lines.count || nline < 1)
+  {
+    HELP_PRINT(file->lines.count);
+    return;
+  }
 
-  // printf("%d\n", file->lines.lenghts[nline - 1]);
+  int offset = file->lines.offsets[nline - 1];
+  int length = file->lines.lenghts[nline - 1];
+
+  char *line = malloc(length + 1);
+  memcpy(line, &file->data[offset], length);
+  line[length] = '\0';
+  
+  printf("%s\n", line);
 }
 
 void feya_repl(file_t *file)
@@ -237,22 +220,7 @@ void alarm_func(int _handler)
 {
   if (!file) exit(EXIT_SUCCESS);
 
-  lseek(file->fd, 0, SEEK_SET);
-
-  char block[BLOCK_LIMIT + 1];
-  int n;
-  while((n = read(file->fd, block, BLOCK_LIMIT)))
-  {
-    if (n < 0)
-    {
-      if (errno == EINTR) continue;
-      perror("Couldn't read file");
-      exit(EXIT_FAILURE);
-    }
-    block[n] = '\0';
-
-    printf("%s", block);
-  }
+  write(STDOUT_FILENO, file->data, file->stat.st_size);
 
   exit(EXIT_SUCCESS);
 }
