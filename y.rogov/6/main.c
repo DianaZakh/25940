@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -123,7 +124,7 @@ file_t* file_open(const char *path)
   char block[BLOCK_LIMIT + 1]; 
   ssize_t n;
   int last_len = -1;
-  while ((n = read(file->fd, block, BLOCK_LIMIT)) > 0)
+  while ((n = read(file->fd, block, BLOCK_LIMIT)))
   {
     if (n == 0) 
     {
@@ -203,6 +204,9 @@ void feya_repl(file_t *file)
     if (!fgets(input, INPUT_LIMIT, stdin)) break;
     input[strcspn(input, "\n\r")] = '\0';
 
+    // Dismiss the alarm
+    alarm(0);
+
     char *cmd = strtok(input, INPUT_DELIM);
     if (!cmd) continue;
 
@@ -227,8 +231,37 @@ void feya_repl(file_t *file)
 }
 // !FEYA
 
+file_t *file = NULL;
+
+void alarm_func(int _handler)
+{
+  if (!file) exit(EXIT_SUCCESS);
+
+  lseek(file->fd, 0, SEEK_SET);
+
+  char block[BLOCK_LIMIT + 1];
+  int n;
+  while((n = read(file->fd, block, BLOCK_LIMIT)))
+  {
+    if (n < 0)
+    {
+      if (errno == EINTR) continue;
+      perror("Couldn't read file");
+      exit(EXIT_FAILURE);
+    }
+    block[n] = '\0';
+
+    printf("%s", block);
+  }
+
+  exit(EXIT_SUCCESS);
+}
+
 int main(int argc, char *argv[])
 {
+  // Set alarm function
+  signal(SIGALRM, alarm_func);
+
   // Incorrect usage
   if (argc != 2)
   {
@@ -237,8 +270,11 @@ int main(int argc, char *argv[])
   }
 
   // Read file
-  file_t *file = file_open(argv[1]);
+  file = file_open(argv[1]);
   if (!file) return EXIT_FAILURE;
+
+  // Set alarm
+  alarm(5);
 
   // REPL
   feya_repl(file);
