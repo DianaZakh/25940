@@ -156,7 +156,7 @@ void feya_print(file_t *file)
   char *arg = strtok(NULL, INPUT_DELIM);
   if (!arg)
   {
-    HELP_PRINT(file->lines.count);
+    write(STDOUT_FILENO, file->data, file->stat.st_size);
     return;
   }
 
