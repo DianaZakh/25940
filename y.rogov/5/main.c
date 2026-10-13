@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,7 +27,7 @@ File Editor by Yarik Awesome!!! (FEYA)\n\
 Usage: feya [path]\n\
 " COMMANDS
 
-#define HELP_LENGTH(n) printf("Enter a line number in [1; %d]\n", (n));
+#define HELP_LENGTH(n) printf("Enter a line number in range [1; %d]\n", (n));
 
 typedef struct file_s
 {
@@ -38,15 +39,6 @@ typedef struct file_s
     int *lenghts;
   } lines;
 } file_t;
-
-// HELPER
-void prompt(char *buffer, int n, const char *msg)
-{
-  printf("%s", msg);
-  fgets(buffer, n, stdin);
-  buffer[strcspn(buffer, "\n")] = '\0';
-}
-// !HELPER
 
 // FILE
 void file_add_line(file_t *file, int offset, int length)
@@ -70,10 +62,22 @@ void file_add_line(file_t *file, int offset, int length)
   file->lines.lenghts[idx] = length;
 }
 
-void file_block_analyze(file_t *file, const char *block, int file_offset)
+int file_block_analyze(file_t *file, const char *block, int file_offset, int last_len)
 {
   const char *line_start = block;
   const char *line_end = block;
+
+  // Increase last line from prev block
+  if (last_len != -1) {
+    line_end = strchr(line_start, '\n');
+
+    size_t length = line_end - line_start + 1;
+    file->lines.lenghts[file->lines.count - 1] = length + last_len;
+
+    line_start = line_end + 1;
+  }
+
+  // Scan lines with '\n'
   while((line_end = strchr(line_start, '\n')))
   {
     size_t offset = file_offset + (size_t)(line_start - block);
@@ -83,10 +87,13 @@ void file_block_analyze(file_t *file, const char *block, int file_offset)
     line_start = line_end + 1;
   }
 
-  line_end = line_start + strlen(line_start);
+  // Last line ends with '\0'
+  size_t length = strlen(line_start);
+  line_end = line_start + length;
   size_t offset = file_offset + (size_t)(line_start - block);
-  size_t length = line_end - line_start + 1;
   file_add_line(file, offset, length);
+
+  return length;
 }
 
 file_t* file_open(const char *path)
@@ -114,10 +121,10 @@ file_t* file_open(const char *path)
   puts("Reading file...");
   size_t offset = 0;
   char block[BLOCK_LIMIT + 1]; 
-  while (1)
+  ssize_t n;
+  int last_len = -1;
+  while ((n = read(file->fd, block, BLOCK_LIMIT)) > 0)
   {
-    int n = read(file->fd, block, BLOCK_LIMIT);
-
     if (n == 0) 
     {
       puts("Reading file done!");
@@ -125,13 +132,15 @@ file_t* file_open(const char *path)
     }
     if (n == -1)
     {
+      if (errno == EINTR) continue;
+
       perror("Couldn't read a block");
       free(file);
       return NULL;
     }
     block[n] = '\0';
 
-    file_block_analyze(file, block, offset);
+    last_len = file_block_analyze(file, block, offset, last_len);
     offset += n;
   }
 
@@ -190,7 +199,10 @@ void feya_repl(file_t *file)
   char input[INPUT_LIMIT];
   while(1)
   {
-    prompt(input, INPUT_LIMIT, "> ");
+    printf("%s", "> ");
+    if (!fgets(input, INPUT_LIMIT, stdin)) break;
+    input[strcspn(input, "\n\r")] = '\0';
+
     char *cmd = strtok(input, INPUT_DELIM);
     if (!cmd) continue;
 
