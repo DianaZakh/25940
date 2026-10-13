@@ -4,6 +4,7 @@ all: build/1.out\
      build/4.out\
 		 build/5.out\
 		 build/6.out\
+		 build/7.out\
 
 clean: 
 	rm -r build
@@ -19,5 +20,7 @@ build/5.out: 5/main.c | build
 	cc 5/main.c -o build/5.out
 build/6.out: 6/main.c | build
 	cc 6/main.c -o build/6.out
+build/7.out: 7/main.c | build
+	cc 7/main.c -o build/7.out
 build:
 	mkdir -p build
