@@ -22,11 +22,6 @@ File Editor by Yarik Awesome!!! (FEYA)\n\n\
 Usage: feya [path]\n\n\
 " COMMANDS
 
-typedef struct offset_table_s
-{
-
-} offset_table_t;
-
 typedef struct file_s
 {
   int fd;
@@ -41,10 +36,16 @@ void prompt(char *buffer, int n, const char *msg)
   buffer[strcspn(buffer, "\n")] = '\0';
 }
 
-int file_open(file_t *file, const char *path)
+// FILE
+file_t* file_open(const char *path)
 {
+  file_t *file = malloc(sizeof(file_t));
+
   file->fd = open(path, O_RDWR);
-  if (!file->fd) return -1;
+  if (!file->fd) return NULL;
+
+  file->line_count = -1;
+  file->offset_table = NULL;
 
   return 0;
 }
@@ -52,30 +53,12 @@ int file_open(file_t *file, const char *path)
 void file_close(file_t *file)
 {
   close(file->fd);
+  free(file);
 }
 
-int main(int argc, char *argv[])
+void feya_repl(file_t *file)
 {
-  // Incorrect usage
-  if (argc != 2)
-  {
-    puts(HELP);
-    return EXIT_SUCCESS;
-  }
-
-  file_t file = {};
-
-  // Read and Analyze file
-  if (!file_open(&file, argv[1]))
-  {
-    perror("Couldn't open the file");
-    return EXIT_FAILURE;
-  }
-
-  // Read input
   char input[INPUT_LIMIT];
-
-  // REPL
   while(1)
   {
     prompt(input, INPUT_LIMIT, "Enter command:");
@@ -97,8 +80,8 @@ int main(int argc, char *argv[])
       }
       int nline = atoi(arg);
       char buf[1024] = {}; 
-      lseek(file.fd, nline, SEEK_SET);
-      read(file.fd, buf, 1024);
+      lseek(file->fd, nline, SEEK_SET);
+      read(file->fd, buf, 1024);
       printf("%s\n", buf);
     }
     else 
@@ -106,6 +89,28 @@ int main(int argc, char *argv[])
       puts(COMMANDS);
     }
   }
+}
 
-  file_close(&file);
+int main(int argc, char *argv[])
+{
+  // Incorrect usage
+  if (argc != 2)
+  {
+    puts(HELP);
+    return EXIT_SUCCESS;
+  }
+
+  // Read file
+  file_t *file = file_open(argv[1]);
+  if (!file)
+  {
+    perror("Couldn't open the file");
+    return EXIT_FAILURE;
+  }
+
+  // REPL
+  feya_repl(file);
+
+  // Close file
+  file_close(file);
 }
