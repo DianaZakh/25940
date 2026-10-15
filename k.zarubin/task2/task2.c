@@ -23,7 +23,7 @@ int main(){
     putenv("TZ=PST8");
     tzset();
     sp = localtime(&now);
-    printf("PST8:    %d/%d/%02d %02d:%02d %s\n",
+    printf("PST8:    %d/%d/%02d %02d:%02d %s\n\n",
         sp->tm_mon + 1, sp->tm_mday,
         sp->tm_year + 1900, sp->tm_hour,
         sp->tm_min, tzname[sp->tm_isdst]);
