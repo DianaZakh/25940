@@ -5,11 +5,12 @@
 extern char *tzname[];
 
 int main(){
+    printf("\n");
     time_t now;
     struct tm *sp;
     /* текущее время */
     (void) time(&now);
-    printf("Local Time (BIOS):    %s\n", ctime(&now));
+    printf("Local Time (BIOS):    %s", ctime(&now));
 
     /* ставим наше время на часовой пояс по Гринвичу (UTC+0) */
     sp = gmtime(&now);
