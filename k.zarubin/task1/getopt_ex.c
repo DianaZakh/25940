@@ -163,8 +163,8 @@ int main(int argc, char *argv[]) {
 
   /* Выполнение опций в обратном порядке */
   for (int i = cnt - 1; i >= 0; i--) {
-    if (cnt > 1) printf("%d.\n", opt);
     printf("\n");
+    if (cnt > 1) printf("%d.\n", opt);
 
     switch (options[i].opt_name) {
       case 'i': {
@@ -312,14 +312,14 @@ int main(int argc, char *argv[]) {
 
       case 'd': {
         /* Вывод текущего рабочего каталога */
-        char *cwd = getcwd(NULL, 0);
-        if (cwd == NULL) {
+        char cwd[4096];
+      
+        if (getcwd(cwd, sizeof(cwd)) == NULL) {
           perror("getcwd");
           break;
         }
-
+      
         printf("Current directory: %s\n\n", cwd);
-        free(cwd);
         break;
       }
 
