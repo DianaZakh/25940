@@ -109,15 +109,13 @@ int main(){
     /* выводим таблицу смещений */
     printf("\nТаблица смещений файла:\n\n");
     for (int i = 0; i < found_strs; i++){
-        printf("Строка %d: смещение - %lld, длина - %lld\n",
-               i+1, (long long)offs[i], (long long)lens[i]);
+        printf("Строка %d: смещение - %lld, длина - %lld\n\n", i+1, (long long)offs[i], (long long)lens[i]);
     }
-    putc('\n');
-
+    
     long num;
+    printf("Привет! Вводи номер строки для просмотра строки содержимого файла (0 - завершение)\n");
 
     while (1){
-        printf("Введи номер строки (0 - завершение): ");
         fflush(stdout);
 
         int status = input_num(&num);
