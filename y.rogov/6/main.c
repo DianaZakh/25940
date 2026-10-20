@@ -20,6 +20,7 @@ Commands:\
   exit\
   help\
   length [line]\
+  print [line]\
 "
 
 #define HELP \
@@ -29,6 +30,7 @@ Usage: feya [path]\n\
 " COMMANDS
 
 #define HELP_LENGTH(n) printf("Enter a line number in range [1; %d]\n", (n));
+#define HELP_PRINT(n) printf("Enter a line number in range [1; %d]\n", (n));
 
 typedef struct file_s
 {
@@ -177,21 +179,27 @@ void feya_length(file_t *file)
 
 void feya_print(file_t *file)
 {
-  // char *arg = strtok(NULL, INPUT_DELIM);
-  // if (!arg)
-  // {
-  //   HELP_PRINT(file->lines.count);
-  //   return;
-  // }
+  char *arg = strtok(NULL, INPUT_DELIM);
+  if (!arg)
+  {
+    HELP_PRINT(file->lines.count);
+    return;
+  }
 
-  // int nline = atoi(arg);
-  // if (nline > file->lines.count || nline < 1)
-  // {
-  //   HELP_PRINT(file->lines.count);
-  //   return;
-  // }
+  int nline = atoi(arg);
+  if (nline > file->lines.count || nline < 1)
+  {
+    HELP_PRINT(file->lines.count);
+    return;
+  }
+  lseek(file->fd, file->lines.offsets[nline], SEEK_SET);
 
-  // printf("%d\n", file->lines.lenghts[nline - 1]);
+  int length = file->lines.lenghts[nline];
+  char *s = malloc(length);
+  read(file->fd, s, length + 1);
+  s[length] = '\0';
+
+  printf("%s\n", s);
 }
 
 void feya_repl(file_t *file)
