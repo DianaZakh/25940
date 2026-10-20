@@ -191,11 +191,11 @@ void feya_print(file_t *file)
     HELP_PRINT(file->lines.count);
     return;
   }
-  lseek(file->fd, file->lines.offsets[nline], SEEK_SET);
+  lseek(file->fd, file->lines.offsets[nline - 1], SEEK_SET);
 
-  int length = file->lines.lenghts[nline];
-  char *s = malloc(length);
-  read(file->fd, s, length + 1);
+  int length = file->lines.lenghts[nline - 1];
+  char *s = malloc(length + 1);
+  read(file->fd, s, length);
   s[length] = '\0';
 
   printf("%s\n", s);
