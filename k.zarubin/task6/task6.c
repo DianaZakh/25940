@@ -112,7 +112,7 @@ int main(){
         printf("Строка %d: смещение - %lld, длина - %lld\n", i+1, (long long)offs[i], (long long)lens[i]);
     }
     printf("\n");
-    
+
     long num;
     printf("Привет! Вводи номер строки для просмотра строки содержимого файла (0 - завершение)\n");
 
@@ -159,7 +159,10 @@ int main(){
             continue;
         }
 
-        if (num == 0) break;
+        if (num == 0) {
+            printf("Завершение работы\n");
+            break;
+        }
 
         if (num < 1 || num > found_strs){
             printf("Неккоректный ввод (out of range)\n");
