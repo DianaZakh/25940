@@ -3,10 +3,10 @@ CFLAGS = -Wall -Wextra
 TARGET = task3
 SRC = task3.c
 
-all: $(TARGET)
-
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+
+all: $(TARGET)
 
 clean:
 	rm -f $(TARGET)
