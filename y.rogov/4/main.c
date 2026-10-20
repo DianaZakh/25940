@@ -34,27 +34,36 @@ void list_push(list_t *list, char *s)
   }
 }
 
-void prompt(char *buffer, int n)
+const char* prompt(char *buffer, int n)
 {
   puts("Enter your string ('.' to print all strings and exit):");
-  fgets(buffer, n, stdin);
+  const char *r = fgets(buffer, n, stdin);
   buffer[strcspn(buffer, "\n")] = '\0';
+  return r;
 }
 
 int main() {
   list_t list = { NULL, NULL };
 
   char buffer[BUFFER_LIMIT];
-  prompt(buffer, BUFFER_LIMIT);
-
-  while (strcmp(buffer, ".") != 0)
+  while(1)
   {
-    char *s = malloc(strlen(buffer) + 1);
-    strncpy(s, buffer, strlen(buffer) + 1);
+    if (prompt(buffer, BUFFER_LIMIT) == NULL)
+    {
+      if (feof(stdin)) puts("End of file reached.");
+      if (ferror(stdin))
+      {
+        perror("Error while reading user input");
+        return 1;
+      }
+      break;
+    }
+
+    if (strncmp(buffer, ".", 1) == 0) break;
+
+    char *s = strdup(buffer);
 
     list_push(&list, s);
-
-    prompt(buffer, BUFFER_LIMIT);
   }
 
   node_t *it = list.head;
