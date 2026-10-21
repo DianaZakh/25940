@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,11 +28,11 @@ int main()
     in = open("input.txt", 0);
     signal(SIGALRM, handle_timeout);
     
-    while (read(in, &c, 1)!=0) {
+    while (read(in, &c, 1)!=0 && line_counter < MAX_LINE_COUNT) {
         all_line_offsets[line_counter] = line_counter == 0 ? SEEK_SET : all_line_offsets[line_counter - 1] + all_line_sizes[line_counter - 1];
         while (c != '\n' && c != '\0' && c != EOF) {
             all_line_sizes[line_counter]++;
-            read(in, &c, 1);
+            if (read(in, &c, 1)==0) break;
         }
 	all_line_sizes[line_counter]++;
         line_counter++;
@@ -43,12 +42,17 @@ int main()
     printf("> Point number of line (you have 5 sec):\n");
     alarm(5);
     if (scanf("%d", &R)==1) alarm(0);
-    if (R < 0) perror("Wrong line number");
+    if (R < 0 || R > line_counter){
+        perror("Wrong line number");
+        close(in);
+        return 1;
+    } 
     if (R == 0) return 0;
 
     int line_R = lseek(in, all_line_offsets[R - 1], SEEK_SET);
-    char* line = calloc(all_line_sizes[R - 1], sizeof(char));
+    char* line = calloc(all_line_sizes[R - 1] + 1, sizeof(char));
     read(in, line, all_line_sizes[R - 1]);
+    line[all_line_sizes[R - 1]] = '\0';
     printf("Line %d: %s\n", R, line);
     close(in);
     return 0;
