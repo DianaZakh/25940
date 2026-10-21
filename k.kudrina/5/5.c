@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -5,8 +6,16 @@
 #define MAX_LINE_SIZE 1024
 #define MAX_LINE_COUNT 1024
 
-int main(void)
+int main(int argc, char* argv[])
 {
+    if (argc < 2){
+        printf("> Point input file name and number of line.");
+        return 0;
+    } 
+    char* input_file = argv[1];
+    unsigned int R = atoi(argv[2]);
+    if (R == 0) return 0;
+
     unsigned int all_line_sizes[MAX_LINE_COUNT] = {0};
     unsigned int all_line_offsets[MAX_LINE_COUNT];
     unsigned int line_counter = 0;
@@ -25,9 +34,6 @@ int main(void)
         line_counter++;
     }
     
-    unsigned int R;
-    scanf("%d", &R);
-    if (R == 0) return 0;
     int line_R = lseek(in, all_line_offsets[R - 1], SEEK_SET);
     read(in, line, all_line_sizes[R - 1]);
     printf("Line %d: %s\n", R, line);
