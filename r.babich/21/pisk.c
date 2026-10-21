@@ -23,7 +23,7 @@ int main(void)
     signal(SIGINT, pisk);
     signal(SIGQUIT, ender);
 
-    while(true)
+    while(1)
     {
 
     }
