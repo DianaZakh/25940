@@ -15,7 +15,7 @@ int main(void){
     node* cur_node = malloc(sizeof(node));
     node* start = cur_node;
     while (1){
-        scanf("%s", cur_node->line);
+        fgets(cur_node->line, MAXLEN, stdin);
         if (cur_node->line[0]=='.') break;
         cur_node->length = strlen(cur_node->line) + 1;
         cur_node->next = malloc(sizeof(node));
@@ -25,7 +25,7 @@ int main(void){
     printf("> Введённые строки: \n");
     cur_node = start;
     while (cur_node!=NULL) {
-        printf("%s", cur_node->line);
+        printf("%s\n", cur_node->line);
 	cur_node = cur_node->next;
     }
 }
