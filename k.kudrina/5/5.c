@@ -9,7 +9,7 @@
 int main(int argc, char* argv[])
 {
     if (argc < 2){
-        printf("> Point input file name and number of line.");
+        printf("> Point input file name and number of line.\n");
         return 0;
     } 
     char* input_file = argv[1];
@@ -24,13 +24,15 @@ int main(int argc, char* argv[])
     char* line = calloc(MAX_LINE_SIZE, sizeof(char));
 
     
-    while (c != EOF) {
-        all_line_offsets[line_counter] = SEEK_CUR;
-        read(in, &c, 1);
+    while (read(in, &c, 1)!=0) {
+	printf("%c",c);
+        all_line_offsets[line_counter] = line_counter == 0 ? SEEK_SET : all_line_offsets[line_counter - 1] + all_line_sizes[line_counter - 1];
         while (c != '\n' && c != '\0' && c != EOF) {
             all_line_sizes[line_counter]++;
             read(in, &c, 1);
+	    printf("%c",c);
         }
+	all_line_sizes[line_counter]++;
         line_counter++;
     }
     
