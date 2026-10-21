@@ -20,8 +20,8 @@ void ender(int sig)
 
 int main(void)
 {
-    signal(SIGINT, pisk);
-    signal(SIGQUIT, ender);
+    sigset(SIGINT, pisk);
+    sigset(SIGQUIT, ender);
 
     while(1)
     {
