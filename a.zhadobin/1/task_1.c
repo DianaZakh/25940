@@ -268,20 +268,17 @@ int main(int argc, char *argv[])
 
             // limit.rlim_cur = value;
             // setrlimit(RLIMIT_NPROC, &limit);
-            unsigned long long value = strtoull(operations[i].arg, NULL, 10);
-            need = atol(optarg);
-            size_t size = rctlblk_size();
-            rctlblk_t *blk = malloc(size);
+            char *end;
+            errno = 0;
+            long new_limit = strtol(operations[i].arg, &end, 10);
 
-            if (!blk) {
-                perror("malloc");
-                return 1;
-            }
-
-            rctlblk_set_privilege(blk, RCPRIV_BASIC);
-            rctlblk_set_value(blk, value);
-            rctlblk_set_local_action(blk, RCTL_LOCAL_DENY, 0);
-
+            if (errno != 0 || end == operations[i].arg || *end != '\0' || new_limit <= 0) {
+                fprintf(stderr, "invalid -U value: '%s'\n", operations[i].arg);
+            } else {
+                char cmd[256];
+                snprintf(cmd, sizeof(cmd), "prctl -n task.max-processes -v %ld %d >/dev/null 2>&1", new_limit, (int)getpid());
+                if (system(cmd) != 0) fprintf(stderr, "set_ulimit: prctl failed\n");
+        }
 
 
 
