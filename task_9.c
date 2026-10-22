@@ -21,8 +21,8 @@ void print_help(void)
     printf("  filename  - file to display with cat\n");
 
     printf("\nUsage:\n");
-    printf("  ./process_manager <filename>\n");
-    printf("  ./process_manager help\n");
+    printf("  ./task_9 <filename>\n");
+    printf("  ./task_9 help\n");
 
     printf("\nProcess behavior:\n");
     printf("  1. Parent creates a child process\n");
