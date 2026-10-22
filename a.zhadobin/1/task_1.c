@@ -279,6 +279,7 @@ int main(int argc, char *argv[])
                 char cmd[256];
                 snprintf(cmd, sizeof(cmd), "prctl -n task.max-processes -v %ld %d >/dev/null 2>&1", new_limit, (int)getpid());
                 if (system(cmd) != 0) fprintf(stderr, "set_ulimit: prctl failed\n");
+            }
         }
 
 
