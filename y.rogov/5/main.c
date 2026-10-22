@@ -20,6 +20,7 @@ Commands:\
   help\
   length [line]\
   print [line]\
+  table\
 "
 
 #define HELP \
@@ -176,6 +177,15 @@ void feya_length(file_t *file)
   printf("%d\n", file->lines.lenghts[nline - 1]);
 }
 
+void dump_table(file_t *file)
+{
+  puts("Offset table:");
+  for (int i = 0; i < file->lines.count; ++i)
+  {
+    printf("Line №%d offset: %d bytes\n", i, file->lines.offsets[i]);
+  }
+}
+
 void feya_print(file_t *file)
 {
   char *arg = strtok(NULL, INPUT_DELIM);
@@ -226,6 +236,10 @@ void feya_repl(file_t *file)
     else if (strcmp(cmd, "print") == 0)
     {
       feya_print(file);
+    }
+    else if (strcmp(cmd, "table") == 0)
+    {
+      dump_table(file);
     }
     else 
     {
