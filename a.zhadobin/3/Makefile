@@ -1,3 +1,3 @@
 all:
-	gcc -Wall -Wextra -Wpedantic -g getopt.c -o res
+	gcc -Wall -Wextra -Wpedantic -g task_3.c -o res
 	./res
