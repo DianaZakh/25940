@@ -20,17 +20,17 @@ void print_help(void)
     printf("and prints its exit status.\n");
 
     printf("\nUsage:\n");
-    printf("  ./run_command <command> [arguments]\n");
-    printf("  ./run_command help\n");
+    printf("  ./task_10 <command> [arguments]\n");
+    printf("  ./task_10 help\n");
 
     printf("\nCommands:\n");
     printf("  help     - show this information\n");
     printf("  command  - executable to run\n");
 
     printf("\nExamples:\n");
-    printf("  ./run_command ls -l /tmp\n");
-    printf("  ./run_command grep test file.txt\n");
-    printf("  ./run_command false\n");
+    printf("  ./task_10 ls -l /tmp\n");
+    printf("  ./task_10 grep test file.txt\n");
+    printf("  ./task_10 false\n");
 
     printf("\nRules:\n");
     printf("  Command must be executable\n");
