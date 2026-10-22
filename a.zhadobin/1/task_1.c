@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
     }
     
     for (int i = count - 1; i >= 0; i--) {
-        max_procs = sysconf(_SC_CHILD_MAX);
+        // max_procs = sysconf(_SC_CHILD_MAX);
         // if (operations[i].option){
         //     max_procs = need;
         // }
@@ -247,7 +247,8 @@ int main(int argc, char *argv[])
             printf("ppid  %d\n", getppid());
             printf("pgrp  %d\n", getpgrp());
 
-        } else if (operations[i].option == 'u') { 
+        } else if (operations[i].option == 'u') {
+            max_procs = sysconf(_SC_CHILD_MAX);
             errno = 0;
             if (max_procs == -1) {
                 if (errno != 0) {
