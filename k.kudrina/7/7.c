@@ -69,22 +69,22 @@ int main()
     }
     
     int R;
-    printf("> Point number of line (you have 5 sec):\n");
-    alarm(5);
-    if (scanf("%d", &R)==1) alarm(0);
-    if (R < 0 || R > line_counter){
-        perror("Wrong line number");
-        close(in);
-        return 1;
-    } 
-    if (R == 0) return 0;
+    while(1){
+        printf("> Point number of line (you have 5 sec):\n");
+        alarm(5);
+        if (scanf("%d", &R)==1) alarm(0);
+        if (R < 0 || R > line_counter){
+            printf("Wrong line number\n");
+        } 
+        if (R == 0) return 0;
 
-    int start_R = all_line_offsets[R - 1];
-    int size_R = all_line_sizes[R - 1];
-    char* line = calloc(all_line_sizes[R - 1] + 1, sizeof(char));
-    memcpy(line, map + start_R, size_R);
-    line[size_R] = '\0';
-    printf("Line %d: %s\n", R, line);
+        int start_R = all_line_offsets[R - 1];
+        int size_R = all_line_sizes[R - 1];
+        char* line = calloc(all_line_sizes[R - 1] + 1, sizeof(char));
+        memcpy(line, map + start_R, size_R);
+        line[size_R] = '\0';
+        printf("Line %d: %s\n", R, line);
+    }
     close(in);
     return 0;
 }

@@ -39,21 +39,23 @@ int main()
     }
     
     int R;
-    printf("> Point number of line (you have 5 sec):\n");
-    alarm(5);
-    if (scanf("%d", &R)==1) alarm(0);
-    if (R < 0 || R > line_counter){
-        perror("Wrong line number");
-        close(in);
-        return 1;
-    } 
-    if (R == 0) return 0;
+    while(1){
+        printf("> Point number of line (you have 5 sec):\n");
+        alarm(5);
+        if (scanf("%d", &R)==1) alarm(0);
+        if (R < 0 || R > line_counter){
+            perror("Wrong line number");
+            while ((c = getchar())!='\n' && c != EOF){}
+            continue;     
+        } 
+        if (R == 0) return 0;
 
-    int line_R = lseek(in, all_line_offsets[R - 1], SEEK_SET);
-    char* line = calloc(all_line_sizes[R - 1] + 1, sizeof(char));
-    read(in, line, all_line_sizes[R - 1]);
-    line[all_line_sizes[R - 1]] = '\0';
-    printf("Line %d: %s\n", R, line);
+        int line_R = lseek(in, all_line_offsets[R - 1], SEEK_SET);
+        char* line = calloc(all_line_sizes[R - 1] + 1, sizeof(char));
+        read(in, line, all_line_sizes[R - 1]);
+        line[all_line_sizes[R - 1]] = '\0';
+        printf("Line %d: %s\n", R, line);
+    }
     close(in);
     return 0;
 }
