@@ -26,6 +26,6 @@ int main(void){
     cur_node = start;
     while (cur_node!=NULL) {
         printf("%s\n", cur_node->line);
-	cur_node = cur_node->next;
+	    cur_node = cur_node->next;
     }
 }
