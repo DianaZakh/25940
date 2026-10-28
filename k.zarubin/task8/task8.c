@@ -23,7 +23,7 @@ int main(){
         close(fd);
         return 1;
     }
-    printf("File locked. Opening editor: ");
+    printf("File locked. Opening editor(ed):\n");
     fflush(stdout);
     
     int status = system("ed file.txt");
