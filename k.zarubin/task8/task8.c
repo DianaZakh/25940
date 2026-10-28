@@ -4,13 +4,15 @@
 #include <fcntl.h>
 
 int main(){
+    system("chmod 664 file.txt");
+    
     int fd = open("file.txt", O_RDWR);
     if (fd == -1){
         perror("open");
         return 1;
     }
-
-    struct flock lock;
+    
+    struct flock lock = {0};
     lock.l_type = F_WRLCK;
     lock.l_whence = SEEK_SET;
     lock.l_start = 0;
