@@ -8,6 +8,8 @@ void pisk(int sig)
 {
     printf("%c", (char)7);
 
+    fflush(stdout);
+
     pisks++;
 }
 
@@ -20,8 +22,8 @@ void ender(int sig)
 
 int main(void)
 {
-    sigset(SIGINT, pisk);
-    sigset(SIGQUIT, ender);
+    signal(SIGINT, pisk);
+    signal(SIGQUIT, ender);
 
     while(1)
     {
