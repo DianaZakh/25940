@@ -15,7 +15,7 @@ int main()
     char c;
     in = open("input.txt", 0);
     while (read(in, &c, 1)!=0 && line_counter < MAX_LINE_COUNT){
-        all_line_offsets[line_counter] = line_counter == 0 ? SEEK_SET : all_line_offsets[line_counter - 1] + all_line_sizes[line_counter - 1] + 1;
+        all_line_offsets[line_counter] = line_counter == 0 ? SEEK_SET : all_line_offsets[line_counter - 1] + all_line_sizes[line_counter - 1];
         while (c != '\n' && c != '\0' && c != EOF) {
             all_line_sizes[line_counter]++;
             if (read(in, &c, 1)==0) break;
@@ -35,7 +35,7 @@ int main()
         line[all_line_sizes[i]] = '\0';
 
         printf("Line #%d: offset = %u, length = %u\n", 
-                i, offset, size);
+                i+1, offset, size);
     }
     printf("\n");
 

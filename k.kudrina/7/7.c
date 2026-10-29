@@ -72,9 +72,11 @@ int main()
     while(1){
         printf("> Point number of line (you have 5 sec):\n");
         alarm(5);
-        if (scanf("%d", &R)==1) alarm(0);
-        if (R < 0 || R > line_counter){
+        if (scanf("%d", &R)==1 && R >=0 && R <= line_counter) alarm(0);
+        else{
             printf("Wrong line number\n");
+	    while ((c = getchar())!='\n' && c != EOF){}
+	    continue;
         } 
         if (R == 0) return 0;
 
