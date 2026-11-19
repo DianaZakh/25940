@@ -7,11 +7,11 @@
 #include <stdio.h>
 #define GET_FSLIM 1
 #define SET_FSLIM 2
-extern char **environ;
+extern char **environ; // переменные среды
 
 main(int argc, char *argv[])
 {
-    int c;
+    int c; 
     char options[ ] = "ispuU:cC:dvV:";
     struct rlimit rlp;
     char **p;
